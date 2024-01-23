@@ -61,6 +61,7 @@ func walk(dir string, ignore []string) error {
 	}
 
 	totalHash := sha256.New()
+	var totalBytes int64
 
 	var currentDir string
 	var dirHash hash.Hash
@@ -103,6 +104,7 @@ func walk(dir string, ignore []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to hash file: %w", err)
 		}
+		totalBytes += n
 
 		// Get the relative path.
 		relativePath, err := filepath.Rel(basePath, absolutePath)
@@ -123,7 +125,7 @@ func walk(dir string, ignore []string) error {
 	}
 
 	// Print overall hash.
-	fmt.Printf("%x .\n", totalHash.Sum(nil))
+	fmt.Printf("%x . %s\n", totalHash.Sum(nil), bytesToHuman(totalBytes))
 	return nil
 }
 
@@ -135,7 +137,7 @@ var limits = []int64{
 	1024 * 1024 * 1024 * 1024 * 1024,        // TB
 	1024 * 1024 * 1024 * 1024 * 1024 * 1024, // PB
 }
-var units = []string{"B", "KB", "GB", "TB", "PB"}
+var units = []string{"B", "KB", "MB", "GB", "TB", "PB"}
 
 func bytesToHuman(n int64) (s string) {
 	var i int
