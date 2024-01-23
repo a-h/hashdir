@@ -99,7 +99,7 @@ func walk(dir string, ignore []string) error {
 		// Calculate the SHA256 hash value of the file.
 		fileHash := sha256.New()
 		w := io.MultiWriter(totalHash, dirHash, fileHash)
-		_, err = io.Copy(w, r)
+		n, err := io.Copy(w, r)
 		if err != nil {
 			return fmt.Errorf("failed to hash file: %w", err)
 		}
@@ -111,7 +111,7 @@ func walk(dir string, ignore []string) error {
 		}
 
 		// Print results.
-		fmt.Printf("%x %s\n", fileHash.Sum(nil), relativePath)
+		fmt.Printf("%x %s %s\n", fileHash.Sum(nil), relativePath, bytesToHuman(n))
 
 		return nil
 	})
@@ -125,4 +125,27 @@ func walk(dir string, ignore []string) error {
 	// Print overall hash.
 	fmt.Printf("%x .\n", totalHash.Sum(nil))
 	return nil
+}
+
+var limits = []int64{
+	1024,                                    // B
+	1024 * 1024,                             // KB
+	1024 * 1024 * 1024,                      // MB
+	1024 * 1024 * 1024 * 1024,               // GB
+	1024 * 1024 * 1024 * 1024 * 1024,        // TB
+	1024 * 1024 * 1024 * 1024 * 1024 * 1024, // PB
+}
+var units = []string{"B", "KB", "GB", "TB", "PB"}
+
+func bytesToHuman(n int64) (s string) {
+	var i int
+	var m int64
+	for i, m = range limits {
+		if n < m {
+			break
+		}
+	}
+	m = m / 1024
+	s = strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", float64(n)/float64(m)), "0"), ".")
+	return s + " " + units[i]
 }
