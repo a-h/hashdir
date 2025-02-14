@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs = {
-      url = "github:NixOS/nixpkgs/23.11";
+      url = "github:NixOS/nixpkgs/nixos-24.11";
     };
   };
 
@@ -26,7 +26,6 @@
           default = pkgs.buildGoModule {
             name = "hashdir";
             src = ./.;
-            go = pkgs.go_1_21;
             vendorHash = null;
 
             # Optional flags.
@@ -39,7 +38,7 @@
       devShells = forAllSystems ({ system, pkgs }: {
         default = pkgs.mkShell {
           packages = with pkgs; [
-            go_1_21
+            go
             gotools
           ];
         };
